@@ -1,13 +1,18 @@
 <template>
-    <group-table v-if="parsed"
-                 :fields="['taskname', 'labor', 'nonlabor', 'total']"
-                 :headers="['Task Name','Labor','Non Labor','Total']"
-                 group-by="name"
-                 :totals="['labor', 'nonlabor', 'total']"
-                 :items="getItems"
-                 :currency="['labor','nonlabor','total']"
-                 group-header-column="taskname"
-    ></group-table>
+    <div>
+        <group-table v-if="parsed"
+                     :fields="['taskname', 'labor', 'nonlabor', 'total']"
+                     :headers="['Task Name','Labor','Non Labor','Total']"
+                     group-by="name"
+                     :totals="['labor', 'nonlabor', 'total']"
+                     :items="getItems"
+                     :currency="['labor','nonlabor','total']"
+                     group-header-column="taskname"
+        ></group-table>
+        <div v-if="error" class="font-bold">
+            There was an error loading data. Please check back later.
+        </div>
+    </div>
 </template>
 
 <script>
@@ -85,6 +90,7 @@ export default {
         return {
             data: null,
             parsed: false,
+            error: false,
             perfs: {}
         }
     },
@@ -92,7 +98,9 @@ export default {
         axios.get('/api/performers').then(response => {
             this.data = response.data;
             this.parsed = this.parseInput(this.data);
-        }).catch(error => console.log);
+        }).catch(error => {
+            this.error = true;
+        });
     },
     computed: {
         getItems() {
