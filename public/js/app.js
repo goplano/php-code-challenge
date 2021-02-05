@@ -2293,6 +2293,13 @@ __webpack_require__.r(__webpack_exports__);
       },
       required: false
     },
+    headers: {
+      type: Array,
+      "default": function _default() {
+        return [];
+      },
+      required: false
+    },
     formats: {
       type: Array,
       "default": function _default() {
@@ -2332,7 +2339,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     format: function format(field, value) {
-      if (value === '' || this.fields.includes(value)) return value;
+      if (value === undefined || this.headers.includes(value) || this.fields.includes(value)) return value;
 
       if (this.formats.includes(field)) {
         return this.formatMoney(value);
@@ -2342,6 +2349,24 @@ __webpack_require__.r(__webpack_exports__);
     },
     formatMoney: function formatMoney(value) {
       return accounting__WEBPACK_IMPORTED_MODULE_0___default().formatMoney(value);
+    },
+    getHeader: function getHeader(currGroup) {
+      var _this = this;
+
+      var header = {};
+      this.fields.forEach(function (field) {
+        var headerText = field;
+
+        var idx = _this.fields.indexOf(field);
+
+        if (idx > 0 && idx < _this.headers.length) {
+          headerText = _this.headers[idx];
+        }
+
+        header[field] = headerText;
+      });
+      header[this.groupHeaderColumn !== null ? this.groupHeaderColumn : this.groupBy] = currGroup;
+      return header;
     }
   },
   computed: {
@@ -2352,7 +2377,7 @@ __webpack_require__.r(__webpack_exports__);
       return this.totals.length > 0;
     },
     groupedData: function groupedData() {
-      var _this = this;
+      var _this2 = this;
 
       if (!this.hasGroupBy && !this.hasTotals) {
         return this.sortedData;
@@ -2362,49 +2387,44 @@ __webpack_require__.r(__webpack_exports__);
       var currGroup = '';
       var totals = {};
       this.sortedData.forEach(function (item) {
-        if (item[_this.groupBy] !== currGroup) {
-          if (_this.hasTotals) {
-            totals[item[_this.groupBy]] = {};
+        if (item[_this2.groupBy] !== currGroup) {
+          if (_this2.hasTotals) {
+            totals[item[_this2.groupBy]] = {};
 
-            _this.totals.forEach(function (field) {
-              return totals[item[_this.groupBy]][field] = 0;
+            _this2.totals.forEach(function (field) {
+              return totals[item[_this2.groupBy]][field] = 0;
             }); // console.log(totals);
 
           }
 
           if (result.length > 0) {
-            if (_this.hasTotals) {
+            if (_this2.hasTotals) {
               var defaults = {};
-              defaults[_this.groupHeaderColumn] = 'Totals';
+              defaults[_this2.groupHeaderColumn] = 'Totals';
 
-              _this.totals.forEach(function (field) {
+              _this2.totals.forEach(function (field) {
                 return defaults[field] = totals[currGroup][field];
               }); // console.log(totals, this.makeRow(defaults));
 
 
-              result.push(_this.makeRow(defaults));
+              result.push(_this2.makeRow(defaults));
             }
 
-            result.push(_this.makeRow());
+            result.push(_this2.makeRow());
           }
 
-          currGroup = item[_this.groupBy]; // print header
+          currGroup = item[_this2.groupBy]; // print header
 
-          var header = {};
+          var header = _this2.getHeader(currGroup);
 
-          _this.fields.forEach(function (field) {
-            return header[field] = field;
-          });
-
-          header[_this.groupHeaderColumn !== null ? _this.groupHeaderColumn : _this.groupBy] = currGroup;
           result.push(header);
         }
 
         result.push(item);
 
-        if (_this.hasTotals) {
-          _this.totals.forEach(function (field) {
-            return totals[item[_this.groupBy]][field] += item[field];
+        if (_this2.hasTotals) {
+          _this2.totals.forEach(function (field) {
+            return totals[item[_this2.groupBy]][field] += item[field];
           });
         }
       });
@@ -2424,14 +2444,14 @@ __webpack_require__.r(__webpack_exports__);
       return result;
     },
     sortedData: function sortedData() {
-      var _this2 = this;
+      var _this3 = this;
 
       return this.items.sort(function (a, b) {
-        if (a[_this2.groupBy] < b[_this2.groupBy]) {
+        if (a[_this3.groupBy] < b[_this3.groupBy]) {
           return -1;
         }
 
-        if (a[_this2.groupBy] > b[_this2.groupBy]) {
+        if (a[_this3.groupBy] > b[_this3.groupBy]) {
           return 1;
         }
 
@@ -2461,6 +2481,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+//
 //
 //
 //
@@ -2603,12 +2624,6 @@ var NonLaborItem = function NonLaborItem(type, title, fiscal_years) {
         });
       });
       return items;
-    },
-    getFields: function getFields() {
-      return ['taskname', 'labor', 'nonlabor', 'total'];
-    },
-    getTotals: function getTotals() {
-      return ['labor', 'nonlabor', 'total'];
     },
     getTestItems: function getTestItems() {
       return [{
@@ -20399,9 +20414,10 @@ var render = function() {
   return _vm.parsed
     ? _c("group-table", {
         attrs: {
-          fields: _vm.getFields,
+          fields: ["taskname", "labor", "nonlabor", "total"],
+          headers: ["Task Name", "Labor", "Non Labor", "Total"],
           "group-by": "name",
-          totals: _vm.getTotals,
+          totals: ["labor", "nonlabor", "total"],
           items: _vm.getItems,
           formats: ["labor", "nonlabor", "total"],
           "group-header-column": "taskname"

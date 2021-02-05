@@ -45,6 +45,13 @@ export default {
             },
             required: false
         },
+        headers: {
+            type: Array,
+            default: function () {
+                return [];
+            },
+            required: false
+        },
         formats: {
             type: Array,
             default: function () {
@@ -79,7 +86,7 @@ export default {
             }
         },
         format(field, value) {
-            if (value === '' || this.fields.includes(value) ) return value;
+            if ( value === undefined || this.headers.includes(value) || this.fields.includes(value)) return value;
             if (this.formats.includes(field)) {
                 return this.formatMoney(value);
             }
@@ -87,6 +94,19 @@ export default {
         },
         formatMoney(value) {
             return accounting.formatMoney(value);
+        },
+        getHeader(currGroup) {
+            let header = {};
+            this.fields.forEach((field) => {
+                let headerText = field;
+                const idx = this.fields.indexOf(field);
+                if(idx >  0 && idx < this.headers.length) {
+                    headerText = this.headers[idx];
+                }
+                header[field] = headerText;
+            });
+            header[(this.groupHeaderColumn !== null) ? this.groupHeaderColumn : this.groupBy] = currGroup;
+            return header;
         },
     },
     computed: {
@@ -106,6 +126,8 @@ export default {
             let totals = {};
 
             this.sortedData.forEach((item) => {
+
+
                 if (item[this.groupBy] !== currGroup) {
                     if (this.hasTotals) {
                         totals[item[this.groupBy]] = {};
@@ -126,9 +148,7 @@ export default {
                     }
                     currGroup = item[this.groupBy];
                     // print header
-                    let header = {};
-                    this.fields.forEach((field) => header[field] = field);
-                    header[(this.groupHeaderColumn !== null) ? this.groupHeaderColumn : this.groupBy] = currGroup;
+                    let header = this.getHeader(currGroup);
                     result.push(header);
 
                 }

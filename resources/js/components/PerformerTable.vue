@@ -1,8 +1,9 @@
 <template>
     <group-table v-if="parsed"
-                 :fields="getFields"
+                 :fields="['taskname', 'labor', 'nonlabor', 'total']"
+                 :headers="['Task Name','Labor','Non Labor','Total']"
                  group-by="name"
-                 :totals="getTotals"
+                 :totals="['labor', 'nonlabor', 'total']"
                  :items="getItems"
                  :formats="['labor','nonlabor','total']"
                  group-header-column="taskname"
@@ -115,12 +116,6 @@ export default {
                 })
             });
             return items;
-        },
-        getFields() {
-            return ['taskname', 'labor', 'nonlabor', 'total'];
-        },
-        getTotals() {
-            return ['labor', 'nonlabor', 'total']
         },
         getTestItems() {
             return [
