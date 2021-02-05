@@ -17,3 +17,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::get('/performers',function() {
+    $filename = join(DIRECTORY_SEPARATOR,[base_path(),'data.json']);
+    $contents = file_get_contents($filename);
+    if (request()->expectsJson()) {
+        return response()->json(json_decode($contents));
+    }
+});
