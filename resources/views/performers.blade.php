@@ -3,13 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <title>Data Template Code Challenge</title>
     <link href="{{ mix('css/app.css') }}" rel="stylesheet">
 
 </head>
 <body class="antialiased">
-<div id="app"  class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center sm:pt-0">
+<div id="app"  class="w-full">
     @if (Route::has('login'))
         <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
             @auth
@@ -24,13 +23,10 @@
         </div>
     @endif
     <div class="mx-auto sm:px-6 lg:px-8">
-        <performer-table class="">Performer Totals by Task</performer-table>
-
+        <h1 class="font-bold text-lg">Performer Totals by Task</h1>
+        <performer-table class="overflow-x-auto my-4 text-sm border-2 border-blue-800"></performer-table>
     </div>
 </div>
 <script src="{{mix('js/app.js')}}"></script>
 </body>
 </html>
-<script>
-
-</script>
