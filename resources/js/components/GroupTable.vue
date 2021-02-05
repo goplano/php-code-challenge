@@ -2,7 +2,7 @@
     <div class="w-full">
         <table class="collapse border">
             <tr v-for="item in groupedData">
-                <td v-for="field in fields" class="border px-3 py-1">{{ format(field, item[field]) }}</td>
+                <td v-for="field in fields" class="border px-3 py-1" :class="getClass(item)">{{ format(field, item[field]) }}</td>
             </tr>
         </table>
     </div>
@@ -71,8 +71,9 @@ export default {
             });
             return sum;
         },
-        makeRow(defaults = {}) {
+        makeRow(defaults = {}, isHeader = false) {
             let obj = {};
+            obj.isHeader = isHeader;
             this.fields.forEach(field => {
                 obj[field] = "";
             });
@@ -86,7 +87,7 @@ export default {
             }
         },
         format(field, value) {
-            if ( value === undefined || this.headers.includes(value) || this.fields.includes(value)) return value;
+            if ( value === "" || value === undefined || this.headers.includes(value) || this.fields.includes(value)) return value;
             if (this.formats.includes(field)) {
                 return this.formatMoney(value);
             }
@@ -97,6 +98,7 @@ export default {
         },
         getHeader(currGroup) {
             let header = {};
+            header.isHeader = true;
             this.fields.forEach((field) => {
                 let headerText = field;
                 const idx = this.fields.indexOf(field);
@@ -108,6 +110,12 @@ export default {
             header[(this.groupHeaderColumn !== null) ? this.groupHeaderColumn : this.groupBy] = currGroup;
             return header;
         },
+        getClass(item) {
+            if(item.hasOwnProperty('isHeader') && item.isHeader === true) {
+                return ["font-bold",'whitespace-nowrap'];
+            }
+            return [];
+        }
     },
     computed: {
         hasGroupBy() {
@@ -138,7 +146,7 @@ export default {
                     if (result.length > 0) {
                         if (this.hasTotals) {
                             let defaults = {};
-                            defaults[this.groupHeaderColumn] = 'Totals';
+                            defaults[this.groupHeaderColumn] = 'Totals:';
                             this.totals.forEach((field) => defaults[field] = totals[currGroup][field]);
                             // console.log(totals, this.makeRow(defaults));
 

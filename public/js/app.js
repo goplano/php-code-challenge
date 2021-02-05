@@ -2321,7 +2321,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     makeRow: function makeRow() {
       var defaults = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var isHeader = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
       var obj = {};
+      obj.isHeader = isHeader;
       this.fields.forEach(function (field) {
         obj[field] = "";
       });
@@ -2339,7 +2341,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     format: function format(field, value) {
-      if (value === undefined || this.headers.includes(value) || this.fields.includes(value)) return value;
+      if (value === "" || value === undefined || this.headers.includes(value) || this.fields.includes(value)) return value;
 
       if (this.formats.includes(field)) {
         return this.formatMoney(value);
@@ -2354,6 +2356,7 @@ __webpack_require__.r(__webpack_exports__);
       var _this = this;
 
       var header = {};
+      header.isHeader = true;
       this.fields.forEach(function (field) {
         var headerText = field;
 
@@ -2367,6 +2370,13 @@ __webpack_require__.r(__webpack_exports__);
       });
       header[this.groupHeaderColumn !== null ? this.groupHeaderColumn : this.groupBy] = currGroup;
       return header;
+    },
+    getClass: function getClass(item) {
+      if (item.hasOwnProperty('isHeader') && item.isHeader === true) {
+        return ["font-bold", 'whitespace-nowrap'];
+      }
+
+      return [];
     }
   },
   computed: {
@@ -2400,7 +2410,7 @@ __webpack_require__.r(__webpack_exports__);
           if (result.length > 0) {
             if (_this2.hasTotals) {
               var defaults = {};
-              defaults[_this2.groupHeaderColumn] = 'Totals';
+              defaults[_this2.groupHeaderColumn] = 'Totals:';
 
               _this2.totals.forEach(function (field) {
                 return defaults[field] = totals[currGroup][field];
@@ -20377,9 +20387,11 @@ var render = function() {
         return _c(
           "tr",
           _vm._l(_vm.fields, function(field) {
-            return _c("td", { staticClass: "border px-3 py-1" }, [
-              _vm._v(_vm._s(_vm.format(field, item[field])))
-            ])
+            return _c(
+              "td",
+              { staticClass: "border px-3 py-1", class: _vm.getClass(item) },
+              [_vm._v(_vm._s(_vm.format(field, item[field])))]
+            )
           }),
           0
         )
