@@ -24,7 +24,7 @@
     @endif
     <div class="mx-auto sm:px-6 lg:px-8">
         <h1 class="font-bold text-lg">Performer Totals by Task</h1>
-        <performer-table class="overflow-x-auto my-4 text-sm border-2 border-blue-800"></performer-table>
+        <performer-table class="overflow-x-auto my-4 text-sm"></performer-table>
     </div>
 </div>
 <script src="{{mix('js/app.js')}}"></script>

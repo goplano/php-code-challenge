@@ -1,8 +1,10 @@
 <template>
     <div class="w-full">
-        <table class="collapse border">
-            <tr v-for="item in groupedData">
-                <td v-for="field in fields" class="border px-3 py-1" :class="getClass(item)">{{ format(field, item[field]) }}</td>
+        <table class="group-table">
+            <tr v-for="(item,index) in groupedData" class="group-table-row">
+                <td v-for="field in fields" class="group-table-cell" :class="getClass(item, field, index)">
+                    {{ format(field, item[field]) }}
+                </td>
             </tr>
         </table>
     </div>
@@ -12,7 +14,7 @@
 import accounting from "accounting";
 
 export default {
-    name: "MyTable",
+    name: "GroupTable",
     props: {
         fields: {
             type: Array,
@@ -52,7 +54,7 @@ export default {
             },
             required: false
         },
-        formats: {
+        currency: {
             type: Array,
             default: function () {
                 return [];
@@ -87,8 +89,8 @@ export default {
             }
         },
         format(field, value) {
-            if ( value === "" || value === undefined || this.headers.includes(value) || this.fields.includes(value)) return value;
-            if (this.formats.includes(field)) {
+            if (value === "" || value === undefined || this.headers.includes(value) || this.fields.includes(value)) return value;
+            if (this.currency.includes(field)) {
                 return this.formatMoney(value);
             }
             return value;
@@ -102,19 +104,31 @@ export default {
             this.fields.forEach((field) => {
                 let headerText = field;
                 const idx = this.fields.indexOf(field);
-                if(idx >  0 && idx < this.headers.length) {
+                if (idx >= 0 && idx < this.headers.length) {
                     headerText = this.headers[idx];
                 }
                 header[field] = headerText;
             });
-            header[(this.groupHeaderColumn !== null) ? this.groupHeaderColumn : this.groupBy] = currGroup;
+            if (this.hasGroupBy) {
+                header[(this.groupHeaderColumn !== null) ? this.groupHeaderColumn : this.groupBy] = currGroup;
+            }
             return header;
         },
-        getClass(item) {
-            if(item.hasOwnProperty('isHeader') && item.isHeader === true) {
-                return ["font-bold",'whitespace-nowrap'];
+        getClass(item, field, index) {
+            let classes = [];
+            if (item.hasOwnProperty('isHeader') && item.isHeader === true) {
+                classes = ["group-table-header-cell"];
+            } else {
+                if (index % 2 === 0) {
+                    classes = ['group-table-even']
+                } else {
+                    classes = ['group-table-odd'];
+                }
             }
-            return [];
+            if (this.currency.includes(field)) {
+                classes.push("group-table-currency");
+            }
+            return classes;
         }
     },
     computed: {
@@ -140,7 +154,6 @@ export default {
                     if (this.hasTotals) {
                         totals[item[this.groupBy]] = {};
                         this.totals.forEach((field) => totals[item[this.groupBy]][field] = 0);
-                        // console.log(totals);
                     }
 
                     if (result.length > 0) {
@@ -148,7 +161,6 @@ export default {
                             let defaults = {};
                             defaults[this.groupHeaderColumn] = 'Totals:';
                             this.totals.forEach((field) => defaults[field] = totals[currGroup][field]);
-                            // console.log(totals, this.makeRow(defaults));
 
                             result.push(this.makeRow(defaults));
                         }
@@ -172,7 +184,6 @@ export default {
                     let defaults = {};
                     defaults[this.groupHeaderColumn] = 'Totals';
                     this.totals.forEach((field) => defaults[field] = totals[currGroup][field]);
-                    // console.log(totals, this.makeRow(defaults));
                     result.push(this.makeRow(defaults));
                 }
             }
@@ -193,6 +204,38 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+.group-table {
+    width: 100%;
+    table-layout: auto;
+    border: 1px solid black;
+    border-collapse: collapse;
+}
 
+.group-table-cell {
+    border: 1px solid black;
+    padding: .25rem .75rem;
+    height: 1.2rem;
+}
+
+.group-table-header-cell {
+    font-weight: bold;
+    white-space: nowrap;
+    /*background-color: rgb(31, 41, 55);*/
+    /*color: white;*/
+}
+
+.group-table-even {
+    color: rgb(31, 41, 55);
+    background-color: white;
+}
+
+.group-table-odd {
+    color: rgb(31, 41, 55);
+    background-color: rgb(239, 246, 255);
+}
+
+.group-table-currency {
+    text-align: right;
+}
 </style>
